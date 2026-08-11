@@ -119,7 +119,8 @@ public enum MerchantCategory {
 
 
 }
-   
+
+//where or not  a transaction was approved depends on the store logic
 public enum TransactionStatus{
     PENDING, 
     APPROVED,

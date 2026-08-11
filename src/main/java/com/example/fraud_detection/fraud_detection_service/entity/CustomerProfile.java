@@ -4,12 +4,17 @@ import java.time.LocalDateTime;
 import java.util.List;
 
 
-import com.example.fraud_detection.fraud_detection_service.repository.TransactionHistoryRepository;
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.Id;
-import jakarta.persistence.OneToMany;
+import com.example.fraud_detection.Transaction_service.repository.CustomerRepository;
+import com.example.fraud_detection.Transaction_service.entity.Customer;
 
+import jakarta.persistence.Entity;
+import jakarta.persistence.FetchType;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.OneToMany;
+import jakarta.persistence.OneToOne;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -22,18 +27,24 @@ public class CustomerProfile {
 
 
     @Id
-    @GeneratedValue
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long Id;
 
-    private  Long CustomerId;
+    @OneToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "customerId")
+    private  Customer customer;
 
     private long totalTransactions; 
 
     private String HomeCountry;
 
-    private List<String> typicalMerchantCategories;
+    // private List<String> typicalMerchantCategories;
 
-    private  double averageSpendingAmount;
+    // private  double averageSpendingAmount;
+
+    
+    private LocalDateTime last_updated;
+    
     
             //maintains their most/frequent used phones, merchants
             //amd what countries they usually are at.
@@ -76,8 +87,9 @@ public class CustomerProfile {
     }
 
 
-    private LocalDateTime last_updated;
-    
+
+   
+
 
     
     

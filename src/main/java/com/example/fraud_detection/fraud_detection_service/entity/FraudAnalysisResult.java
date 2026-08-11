@@ -43,10 +43,28 @@ public class FraudAnalysisResult {
     private Long customer_id;
 
     @Column
-    private Double riskScore;
+    private  Long riskScore;
+
+    private Long velocity;
 
     @Column  private LEVEL riskLevel; 
 
+    @Column private String Country;
+
+    @Column
+    private Boolean isNewMerchant;
+
+    @Column
+    private Boolean isNewDevice;
+
+    @Column
+    private boolean isNewCountry;
+
+
+    @Column
+    private Boolean impossibleTravel;
+
+    
 
     @Column 
     private STATUS status;
@@ -61,6 +79,11 @@ public class FraudAnalysisResult {
         this.reasons.add(reason);
     }
 
+    public boolean getIsNewCountry(){
+        return isNewCountry;
+    }
 
+//in the second version of this i want to add time and country 
+//usual/unusuallnesss
 
 }

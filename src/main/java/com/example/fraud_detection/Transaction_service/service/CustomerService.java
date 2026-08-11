@@ -44,7 +44,7 @@ public class CustomerService {
         
     
         for(Customer custo: customers){
-        if(customerRepository.existsById(custo.getCustomerId())){
+        if(customerRepository.existsById(custo.getId())){
             throw new CustomerAlreadyExistsException("Could not save customer " + custo.getName() + "already exists");
         }
         customerRepository.save(custo);

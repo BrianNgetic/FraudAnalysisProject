@@ -39,29 +39,29 @@ public class KafkaFraudEventsPublisher {
        Transaction thisTransaction =  transactionRepository.getReferenceById(result.getTransaction_id());
 
         //create a fraudEvent
-            KafkaFraudCreatedEvent fraudEvent = new KafkaFraudCreatedEvent(
-                    UUID.randomUUID().toString(),
-                    result.getTransaction_id(),
-                    result.getCustomer_id(),
-                    thisTransaction.getAmount(),
-                    thisTransaction.getCurrency().toString(),
-                    thisTransaction.getMerchantCategory().toString(),
-                    thisTransaction.getCountry().toString(),
-                    result.getRiskScore(),
-                    result.getStatus().toString(),
-                    result.getReasons(),
-                    result.getAnalyzed_at()
-            );
+            // KafkaFraudCreatedEvent fraudEvent = new KafkaFraudCreatedEvent(
+            //         UUID.randomUUID().toString(),
+            //         result.getTransaction_id(),
+            //         result.getCustomer_id(),
+            //         thisTransaction.getAmount(),
+            //         thisTransaction.getCurrency().toString(),
+            //         thisTransaction.getMerchantCategory().toString(),
+            //         thisTransaction.getCountry().toString(),
+            //         result.getRiskScore(),
+            //         result.getStatus().toString(),
+            //         result.getReasons(),
+            //         result.getAnalyzed_at()
+            // );
         //publish
-        kafkaTemplate.send(TOPIC, fraudEvent)
-                        .whenComplete( (Result, ex) -> {
-                        if(ex == null){
-                            log.info("message sent to topic : {}", fraudEvent );
-                        }
-                        else{
-                            log.error("failed to send message", ex);
-                        }
-                    });
+        // kafkaTemplate.send(TOPIC, fraudEvent)
+        //                 .whenComplete( (Result, ex) -> {
+        //                 if(ex == null){
+        //                     log.info("message sent to topic : {}", fraudEvent );
+        //                 }
+        //                 else{
+        //                     log.error("failed to send message", ex);
+        //                 }
+        //             });
 
     }
     

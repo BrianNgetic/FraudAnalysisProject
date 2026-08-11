@@ -20,25 +20,40 @@ public class CreatedTransactionRequestDto{
 
     private String currencyString;
 
+    private String merchant;
+
     private String merchantCategoryString;
 
     private String country;
 
+    @NonNull
+    private Double longitude;
+
+    @NonNull
+    private Double latitude;
+
     private String deviceId;
 
     public CreatedTransactionRequestDto(
-        Long customerId, double transaction_amount, String currencyString,  
-        String merchantCategoryString, String country, String deviceId
+        Long customerId, double transaction_amount, String currencyString, String merchant, 
+        String merchantCategoryString, String country, Double longitude,
+        Double latitude, String deviceId
     ){
         this.customerId = customerId;
         this.transaction_amount = transaction_amount;
         this.currencyString  = currencyString;
+        this.merchant = merchant;
         this.merchantCategoryString = merchantCategoryString;
         this.country = country;
+        this.longitude = longitude;
+        this.latitude = latitude;
         this.deviceId = deviceId;
     }
 
 
+    public Double getLatitude(){
+        return this.latitude;
+    }
 
 
 }

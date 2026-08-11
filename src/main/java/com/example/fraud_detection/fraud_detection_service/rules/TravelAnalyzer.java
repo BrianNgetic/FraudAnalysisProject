@@ -2,19 +2,21 @@ package com.example.fraud_detection.fraud_detection_service.rules;
 
 import java.time.*;
 
+import org.springframework.stereotype.Component;
+
 import com.example.fraud_detection.Transaction_service.kafka.KafkaTransactionCreatedEvent;
 
 
 import com.example.fraud_detection.fraud_detection_service.entity.TravelResult;
-import com.example.fraud_detection.fraud_detection_service.entity.TransactionHistory;
+import com.example.fraud_detection.Transaction_service.entity.Transaction;
 
-
+@Component
 public class TravelAnalyzer {
 
     private static final double EARTH_RADIUS = 6371.0;
     private static final double MAX_REASONABLE_TRAVEL_SPEED = 1000; //KMH
 
-    public TravelResult analyze(TransactionHistory lastTransaction, KafkaTransactionCreatedEvent currentTransaction ){
+    public TravelResult analyze(Transaction lastTransaction, KafkaTransactionCreatedEvent currentTransaction ){
         
             double distanceBetweenTransactionsInKm =   calculateDistance(lastTransaction, currentTransaction);
             double hoursElapsed = calculateHoursElapsed(lastTransaction, currentTransaction);
@@ -39,7 +41,7 @@ public class TravelAnalyzer {
 
 
     
-    public static Double calculateDistance(TransactionHistory lastTransaction, KafkaTransactionCreatedEvent currentTransaction){
+    public static Double calculateDistance(Transaction lastTransaction, KafkaTransactionCreatedEvent currentTransaction){
         
         
         double lat1Rad = Math.toRadians(lastTransaction.getLatitude());
@@ -50,7 +52,8 @@ public class TravelAnalyzer {
 
 
         double deltaLat = lat2Rad - lat1Rad;
-        double deltaLong = lat2Rad - lat1Rad;
+        double deltaLong = long2Rad - long1Rad;
+        
 
         //haversite math formula
 
@@ -63,9 +66,9 @@ public class TravelAnalyzer {
     
         //returns the distance in km
         return EARTH_RADIUS * c;
-    }
-   
-    public double  calculateHoursElapsed(TransactionHistory lastTransaction, KafkaTransactionCreatedEvent currentTransaction )
+    } 
+    
+    public double  calculateHoursElapsed(Transaction lastTransaction, KafkaTransactionCreatedEvent currentTransaction )
     {
 
 
@@ -83,10 +86,5 @@ public class TravelAnalyzer {
         //returns the time between transaction in fractional hours, so 1.5 hrs, 2.1, etc
          return  Duration.between(lastTransactionInstant, currentTransactionInstant).toNanos() / 3600000000000.0;
 
-        
-
-        
-    }
-    
-    
+    } 
 }

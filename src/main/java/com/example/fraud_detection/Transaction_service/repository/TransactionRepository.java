@@ -11,7 +11,8 @@ import java.util.List;
 @Repository
 public interface  TransactionRepository  extends JpaRepository<Transaction, Long>{
     
-    List<Transaction>  findByCustomerCustomerId(Long customerId);
+    List<Transaction> findByCustomerId(Long id);
+    List<Transaction> findTop100ByCustomerIdOrderByTimestampDesc(Long customerId);
 
 
 

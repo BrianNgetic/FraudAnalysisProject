@@ -65,8 +65,12 @@ public class TransactionMapper {
         newTransaction.setAmount(requestDto.getTransaction_amount());
         newTransaction.setCurrency(verifiedCurrency.get());
         newTransaction.setCountry(verifiedCountry);
+        newTransaction.setMerchant(requestDto.getMerchant());
         newTransaction.setMerchantCategory(verifiedMerchantCategory);
+        newTransaction.setLatitude(requestDto.getLatitude());
+        newTransaction.setLongitude(requestDto.getLongitude());
         newTransaction.setDeviceId(requestDto.getDeviceId());
+        newTransaction.setTransactionStatus(TransactionStatus.APPROVED);
         newTransaction.setTimestamp(LocalDateTime.now());
         newTransaction.setTransactionStatus(TransactionStatus.PENDING);
         return newTransaction;

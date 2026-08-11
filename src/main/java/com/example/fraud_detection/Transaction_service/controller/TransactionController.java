@@ -44,7 +44,7 @@ public class TransactionController {
     }
 
     //currently this is for testing, normally when you create a transaction it publishes automatically
-    @PostMapping("/publish")
+    @PostMapping("/publish/{Id}")
     public ResponseEntity<?> publishTransaction(@PathVariable Long Id) throws Exception{
 
         transactionService.publicTransaction(Id);

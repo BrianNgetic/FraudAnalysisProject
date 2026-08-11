@@ -1,6 +1,10 @@
 package com.example.fraud_detection.fraud_detection_service.service;
 
+import java.util.Comparator;
 import java.util.List;
+import java.util.Optional;
+
+import org.springframework.stereotype.Service;
 
 import com.example.fraud_detection.fraud_detection_service.entity.CustomerCountryFrequency;
 import com.example.fraud_detection.fraud_detection_service.entity.CustomerMerchantFrequency;
@@ -8,6 +12,7 @@ import com.example.fraud_detection.fraud_detection_service.entity.CustomerProfil
 
 import com.example.fraud_detection.Transaction_service.kafka.KafkaTransactionCreatedEvent;
 
+@Service
 public class CustomerProfileUpdater {
     
 
@@ -21,9 +26,12 @@ public class CustomerProfileUpdater {
 
         List<CustomerCountryFrequency> thisCustomersCountryFrequeuncy =  customerProfile.getCountryFrequencies();
         List<CustomerMerchantFrequency> thisCustomerMerchantFrequencies = customerProfile.getMerchantFrequencies();
+        
+              
 
         for(CustomerCountryFrequency countryFrequency : thisCustomersCountryFrequeuncy){
 
+            
             if(countryFrequency.getCountry().equals(event.getCountry())){
 
                 countryFrequency.incrementTransactionCount();
@@ -31,11 +39,12 @@ public class CustomerProfileUpdater {
                 countryFound = true;
                 break;
             }
+
         
         }
 
         for(CustomerMerchantFrequency merchantFrequency : thisCustomerMerchantFrequencies){
-            if(merchantFrequency.getMerchantCategory().equals(event.getMerchantCategory())){
+            if(merchantFrequency.getMerchant().equals(event.getMerchantCategory())){
 
                 merchantFrequency.incrementTransactionCount();
 
@@ -57,5 +66,11 @@ public class CustomerProfileUpdater {
 
         }
 
+       Optional< CustomerCountryFrequency> mostFrequentCountry = thisCustomersCountryFrequeuncy.stream()
+                                                                                    .max(Comparator.comparingLong(c -> c.getTransactionCount()));
+        if(mostFrequentCountry.isPresent()){
+        customerProfile.setHomeCountry(mostFrequentCountry.get().getCountry());  
+
+        }
     }
 }

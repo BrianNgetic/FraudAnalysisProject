@@ -45,8 +45,10 @@ public class Transaction {
      @Column
     private Country country;
 
+    @NonNull
     @Column private Double longitude;
 
+    @NonNull
     @Column private Double latitude;
 
     

@@ -35,7 +35,7 @@ public class KafkaTransactionEventsPublisher {
 
           KafkaTransactionCreatedEvent transactionCreatedEvent = KafkaTransactionCreatedEvent.builder()
                             .transactionId(savedTransaction.getTransactionId())
-                            .customerId(savedTransaction.getCustomer().getCustomerId())
+                            .customerId(savedTransaction.getCustomer().getId())
                             .amount(savedTransaction.getAmount())
                             .currency(savedTransaction.getCurrency().toString())
                             .country(savedTransaction.getCountry().toString())

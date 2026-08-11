@@ -59,6 +59,7 @@ public class TransactionService {
          if(!transactionRepository.existsById(Id)){
             throw new TransactionNotFoundException();
         }
+        System.out.println("about to publish transaction of id: " + Id);
         Transaction thisTransaction = transactionRepository.getReferenceById(Id);
         kafkaTransactionEventsPublisher.publishTransaction(thisTransaction);
     }
@@ -79,7 +80,7 @@ public class TransactionService {
             throw new CustomerNotFoundException();
         }
 
-        return transactionRepository.findByCustomerCustomerId(id);
+        return transactionRepository.findByCustomerId(id);
     }
 
 
