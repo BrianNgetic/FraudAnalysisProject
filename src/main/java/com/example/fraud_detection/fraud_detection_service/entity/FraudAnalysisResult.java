@@ -10,6 +10,7 @@ import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.persistence.Transient;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.Setter;
@@ -62,7 +63,7 @@ public class FraudAnalysisResult {
 
 
     @Column
-    private Boolean impossibleTravel;
+    private Boolean possibleTravel;
 
     
 
@@ -75,6 +76,9 @@ public class FraudAnalysisResult {
     @Column
     private  LocalDateTime analyzed_at;
 
+    @Transient
+    private boolean hasHistory;
+    
     public void addReason(String reason){
         this.reasons.add(reason);
     }
@@ -83,6 +87,13 @@ public class FraudAnalysisResult {
         return isNewCountry;
     }
 
+    public boolean HasHistory(){
+        return hasHistory;
+    }
+
+     public void setIsNewCountry(Boolean isNewCountry){
+        this.isNewCountry = isNewCountry;
+    }
 //in the second version of this i want to add time and country 
 //usual/unusuallnesss
 

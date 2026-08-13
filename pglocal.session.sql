@@ -1,1 +1,1 @@
-select * from customer_profile;
+select * from custo

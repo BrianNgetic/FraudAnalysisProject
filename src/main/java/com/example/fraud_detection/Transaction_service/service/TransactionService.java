@@ -38,19 +38,22 @@ public class TransactionService {
 
 
     
-    public void CreateTransaction(CreatedTransactionRequestDto createdTransactionRequestDto) throws Exception
+    public void CreateTransaction(List<CreatedTransactionRequestDto> createdTransactionRequestDtos) throws Exception
     {
         //created and saved a transaction
         //the mapper here creates a validated transaction from the dto from the user
-       Transaction savedTransaction =  transactionRepository.saveAndFlush(transactionMapper.fromUserCreatedTransactionToTransaction(createdTransactionRequestDto));
-      
-        
-        //publish the event
-        kafkaTransactionEventsPublisher.publishTransaction(savedTransaction);
-        
-        //if successfull
-        savedTransaction.setTransactionStatus(TransactionStatus.PENDING);
-
+        for(CreatedTransactionRequestDto dto: createdTransactionRequestDtos){
+             Transaction savedTransaction =  transactionRepository.saveAndFlush(transactionMapper.fromUserCreatedTransactionToTransaction(dto));
+            
+             //publish the event
+            try{kafkaTransactionEventsPublisher.publishTransaction(savedTransaction);
+            //if successfull
+            savedTransaction.setTransactionStatus(TransactionStatus.PENDING);
+            }catch (Exception e){
+                    
+                    e.printStackTrace();
+            }
+        }
         //return some typa responce from this
         
     }

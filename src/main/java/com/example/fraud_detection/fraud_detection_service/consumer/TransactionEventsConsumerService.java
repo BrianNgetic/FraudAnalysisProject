@@ -51,10 +51,8 @@ public class TransactionEventsConsumerService {
 
 
         //if it isnt fraud then lets just save the event
-        if(analysis_result.getStatus() == STATUS.NOT_FRAUD){
-                fraudAnalysisResultRepository.save(analysis_result);
-        }
-        else if(analysis_result.getStatus() == STATUS.FRAUD){
+      
+        if(analysis_result.getStatus() == STATUS.FRAUD){
                 kafkaFraudEventsPublisher.PublishEvent(analysis_result);
         }
 

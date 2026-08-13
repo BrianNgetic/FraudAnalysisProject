@@ -10,6 +10,8 @@ import java.time.Instant;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.util.Optional;
+import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
 
 
@@ -21,6 +23,7 @@ import com.example.fraud_detection.fraud_detection_service.entity.FraudAnalysisR
 
 import com.example.fraud_detection.Transaction_service.repository.TransactionRepository;
 import com.example.fraud_detection.Transaction_service.entity.Transaction;
+import com.example.fraud_detection.fraud_detection_service.entity.CustomerCountryFrequency;
 import com.example.fraud_detection.fraud_detection_service.entity.CustomerProfile;
 import com.example.fraud_detection.fraud_detection_service.entity.TransactionHistory;
 import com.example.fraud_detection.fraud_detection_service.rules.*;
@@ -31,7 +34,7 @@ import jakarta.transaction.Transactional;
 
 import com.example.fraud_detection.fraud_detection_service.entity.TravelResult;
 import com.example.fraud_detection.fraud_detection_service.entity.FraudAnalysisResult.LEVEL;
-import com.example.fraud_detection.fraud_detection_service.repository.TransactionHistoryRepository;
+import com.example.fraud_detection.fraud_detection_service.entity.FraudAnalysisResult.STATUS;
 import com.example.fraud_detection.Transaction_service.entity.Customer;
 
 import com.example.fraud_detection.fraud_detection_service.repository.CustomerProfileRepository;
@@ -76,10 +79,13 @@ public class FraudDetectionAnalyzerService {
     public FraudAnalysisResult isFraud(KafkaTransactionCreatedEvent event){
 
 
-
+    
+        List<String> reasons = new ArrayList<>();
        FraudAnalysisResult result = FraudAnalysisResult.builder()
                                         .transaction_id(event.getTransactionId())
                                         .customer_id(event.getCustomerId())
+                                        .Country(event.getCountry())
+                                        .reasons(reasons)
                                         .analyzed_at(LocalDateTime.now())
                                         .build();
 
@@ -96,8 +102,8 @@ public class FraudDetectionAnalyzerService {
             
             Customer customerProxy  = entityManager.getReference(Customer.class, event.getCustomerId());
             thisCustomerProfile.setCustomer(customerProxy);
-            customerProfileRepository.save(thisCustomerProfile);
             customerProfileUpdater.updateProfile(event , thisCustomerProfile);
+            customerProfileRepository.save(thisCustomerProfile);
         }
         else
         {
@@ -110,31 +116,56 @@ public class FraudDetectionAnalyzerService {
 
             if(recentTransactions.isEmpty()){
                 //profile exists but thiere is no history
+                result.setHasHistory(false);
                 customerProfileUpdater.updateProfile(event , thisCustomerProfile);
+
 
             }
             else
             {
+                result.setHasHistory(true);
             
+           
 
 
                 Long RiskScore = 0L;
 
-                
+
                 result.setVelocity(velocityRules.velocityAnalyzer(recentTransactions).get(0));
                 RiskScore += velocityRules.velocityAnalyzer(recentTransactions).get(1);
-                
 
-                Transaction LastTransaction = recentTransactions.get(0);
-            
+
+                Transaction LastTransaction = recentTransactions.stream()
+                            .filter(t -> !(t.getTransactionId() == event.getTransactionId()))
+                            .filter(t -> t.getTimestamp().isBefore(event.getTimestamp()))
+                            .findFirst()
+                            .orElse(null);
+
+
                 TravelResult travelAnalysisResult =  travelAnalyzer.analyze(LastTransaction, event);
+            
                 //one of the strongest indicators
+
+                System.out.println(
+                "previous country"  + LastTransaction.getCountry()  + " ID: " + 
+                "Current country and Transaction id"  + event.getCountry() + event.getTransactionId() + 
+                  " Distance : "  + travelAnalysisResult.getDistanceInKm()  + 
+                  " Time elapsed(in hours) :  " + travelAnalysisResult.getHoursElapsed()  + 
+                  " Required speed  : " +travelAnalysisResult.getRequiredSpeed() + 
+                  " The transaction was deemed " + (travelAnalysisResult.isPossibleTravel() ? "possible" : "impossible")
+
+                );
+     
+                
                 if(!travelAnalysisResult.isPossibleTravel()){
                     RiskScore += 30;
-                    result.setImpossibleTravel(true);
+                    result.setPossibleTravel(false);
                     result.addReason("Impossible Travel detected");
-                    
 
+
+                }
+                else{
+                result.setPossibleTravel(true);
                 }
 
                 //average amount spend over the past 100 transactions
@@ -144,7 +175,7 @@ public class FraudDetectionAnalyzerService {
                     totalAmount += H.getAmount();
                     if(H.getAmount() > maxAmount) maxAmount = H.getAmount();
                 }
-            
+
                 double averageSpendOverPast100 = totalAmount / 100;
 
                 if(event.getAmount() > (2 * averageSpendOverPast100) && event.getAmount() < (3 * averageSpendOverPast100)){ RiskScore += 10;}
@@ -152,11 +183,22 @@ public class FraudDetectionAnalyzerService {
                 else if(event.getAmount() > (5 * averageSpendOverPast100)){ RiskScore += 20;}
 
 
-                if(thisCustomerProfile.isNewDevice(event.getDevice())){RiskScore += 10; result.setIsNewDevice(true);}
-                if(thisCustomerProfile.isNewCountry(event.getCountry())){RiskScore += 15;}
-                if(thisCustomerProfile.isNewMarchant(event.getMerchant())){RiskScore += 10; result.setIsNewDevice(true);}
+               if( thisCustomerProfile.isNewDevice(event.getDevice()) ){
+                     RiskScore += 10; 
+                     result.setIsNewDevice(true) ;   
+                }else {result.setIsNewDevice(false);}
 
-        
+                if(thisCustomerProfile.isNewCountry(event.getCountry())){
+                    RiskScore += 15; 
+                    result.setIsNewCountry(true);
+                }else {result.setIsNewCountry(false);}
+
+                if(thisCustomerProfile.isNewMarchant(event.getMerchant())){
+                    RiskScore += 10;
+                    result.setIsNewMerchant(true);
+                }else {result.setIsNewMerchant(false);}
+
+
                 if(RiskScore <= 29){result.setRiskLevel(LEVEL.LOW);}
                 else if(RiskScore > 29 && RiskScore <  60){result.setRiskLevel(LEVEL.MEDIUM);}
                 else if(RiskScore >= 60 && RiskScore < 80){result.setRiskLevel(LEVEL.HIGH);}
@@ -165,6 +207,8 @@ public class FraudDetectionAnalyzerService {
 
                 result.setRiskScore(RiskScore);
 
+                result.setStatus(STATUS.REVIEW);
+
                 customerProfileUpdater.updateProfile(event , thisCustomerProfile);
             }
 
@@ -172,5 +216,7 @@ public class FraudDetectionAnalyzerService {
 
         return result;
     }
+
+
 
 }

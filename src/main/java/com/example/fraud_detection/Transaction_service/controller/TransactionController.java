@@ -33,11 +33,12 @@ public class TransactionController {
     
     
     @PostMapping("/create")
-    public ResponseEntity<?> populateTransactions(@RequestBody CreatedTransactionRequestDto transactionDto) throws Exception {
+    public ResponseEntity<?> populateTransactions(@RequestBody List<CreatedTransactionRequestDto> transactionDtos) throws Exception {
 
-        transactionService.CreateTransaction(transactionDto);
-        
-        return ResponseEntity.status(HttpStatus.CREATED).body(transactionDto);
+      
+        transactionService.CreateTransaction(transactionDtos);
+      
+        return ResponseEntity.status(HttpStatus.CREATED).body(transactionDtos);
 
 
         

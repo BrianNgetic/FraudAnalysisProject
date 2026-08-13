@@ -30,7 +30,7 @@ public class KafkaTransactionEventsPublisher {
 
 
 
-      public void publishTransaction(Transaction savedTransaction){
+      public void publishTransaction(Transaction savedTransaction) throws Exception{
         //create an TransactionEvent from the transaction, it includes the customers id
 
           KafkaTransactionCreatedEvent transactionCreatedEvent = KafkaTransactionCreatedEvent.builder()

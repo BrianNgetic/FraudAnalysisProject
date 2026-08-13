@@ -20,6 +20,8 @@ import com.example.fraud_detection.Transaction_service.kafka.KafkaTransactionCre
 import com.example.fraud_detection.fraud_detection_service.entity.TransactionEmbedding;
 import com.example.fraud_detection.fraud_detection_service.repository.EmbeddingRepository;
 
+import jakarta.annotation.Nonnull;
+
 
 
 @Service
@@ -45,26 +47,56 @@ public class EmbeddingService {
                                 FraudAnalysisResult result){
             
 
+    System.out.print("this result has history: " + result.HasHistory());
+    //split data to intristic and behavioral
+
+
+    StringBuilder text = new StringBuilder();
+
+    //instristic
+    text.append(String.format(
+        "The total Transaction amount was %s .", 
+        event.getAmount())
+
+    );
+    text.append(String.format(
+        "The transaction Occured in %s .",
+         event.getCountry())
+
+    );
+    text.append(String.format(
+        "The transaction happened at %s which was categorized as %s .",
+         event.getMerchant(), event.getMerchantCategory())
+    );
+
+    
+    if(result.HasHistory()){
+
+        text.append(String.format(
+            "The transaction was deemed %s .",
+            result.getPossibleTravel() ?   "possible:" : "impossible" 
+        ));
+
+        text.append(String.format(
+            "The transaction was %s in a new country", 
+             result.getIsNewCountry() ? "made" : "not made "
+        ));
+
+        text.append(String.format(
+            "The device used in this transaction was %s .",
+            result.getIsNewDevice() ? "was" : "was not"
+        ));
+            
+        text.append(String.format(
+            "The Customer has made %s transactions over the past hour .",
+             result.getVelocity()   
+        ));
+
+
+    }
     
     
-    
-     String text = 
-                """ 
-                The total Transaction  amount was %s.
-                The customer made the transaction in %s with travel to make the transaction deemed %s.
-                The transaction was categorized as %s.
-                The customer %s the transaction in a new country and the device %s new.
-                The customer has made %s transactions in the past hour.
-                """.formatted(
-                            event.getAmount(),
-                            event.getCountry(),
-                            result.getImpossibleTravel() ? "impossible" : "possible",
-                            event.getMerchant(),
-                            event.getMerchantCategory(),
-                            result.getIsNewCountry() ? "made" : "did not make ",
-                            result.getIsNewDevice() ? "was" : "was not",
-                            result.getVelocity()
-                );
+   
 
                 //part of the document that isnt going to be embedded(metadata)
         Map<String, Object> metadata = Map.of(
@@ -72,7 +104,7 @@ public class EmbeddingService {
                     "customerId", event.getCustomerId()
           );
 
-       Document document = new Document(text, metadata);
+       Document document = new Document(text.toString(), metadata);
 
        float[] embedding = embeddingModel.embed(document.getText());
 

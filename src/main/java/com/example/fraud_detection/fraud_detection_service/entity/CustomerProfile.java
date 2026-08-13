@@ -36,7 +36,7 @@ public class CustomerProfile {
 
     private long totalTransactions; 
 
-    private String HomeCountry;
+    private String HomeCountry ;
 
     // private List<String> typicalMerchantCategories;
 
@@ -86,9 +86,7 @@ public class CustomerProfile {
         return true;
     }
 
-
-
-   
+    
 
 
     
