@@ -7,18 +7,24 @@ import java.util.List;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
+// import jakarta.persistence.EnumType;
+// import jakarta.persistence.Enumerated;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.Transient;
+import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 @Entity
 @Builder
 @Getter
 @Setter
+@NoArgsConstructor
+@AllArgsConstructor
 public class FraudAnalysisResult {
 
     public enum STATUS{
@@ -35,6 +41,7 @@ public class FraudAnalysisResult {
     }
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "Result_Id")
     private Long Id;
 
     @Column
@@ -68,6 +75,7 @@ public class FraudAnalysisResult {
     
 
     @Column 
+    // @Enumerated(EnumType.STRING)
     private STATUS status;
 
     @Column

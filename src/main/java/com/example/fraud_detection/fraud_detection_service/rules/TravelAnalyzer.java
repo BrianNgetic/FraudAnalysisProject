@@ -80,10 +80,14 @@ public class TravelAnalyzer {
             .atZone(ZoneId.of("America/Chicago"))
             .toInstant();
 
+        System.out.println("Last transaction happened at: " + lastTransaction.getTimestamp());
+
         Instant currentTransactionInstant =  currentTransaction
             .getTimestamp()
             .atZone(ZoneId.of("America/Chicago"))
             .toInstant();
+        
+        System.out.println("The current transaction is from : " + currentTransaction.getTimestamp());
         
         //returns the time between transaction in fractional hours, so 1.5 hrs, 2.1, etc
          return  Duration.between(lastTransactionInstant, currentTransactionInstant).toNanos() / 3600000000000.0;

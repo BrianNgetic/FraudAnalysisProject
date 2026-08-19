@@ -16,7 +16,8 @@ public class VelocityRules {
 
         Instant now = Instant.now();
         Instant oneHourAgo = now.minus(Duration.ofHours(1));
-    
+
+        
         Long  numberofTransactionsInThePastHour = recentTransactions.stream().filter(e -> {
             Instant t = e.getTimestamp().atZone(ZoneId.of("America/Chicago"))
                         .toInstant();

@@ -71,7 +71,7 @@ public class TransactionMapper {
         newTransaction.setLongitude(requestDto.getLongitude());
         newTransaction.setDeviceId(requestDto.getDeviceId());
         newTransaction.setTransactionStatus(TransactionStatus.APPROVED);
-        newTransaction.setTimestamp(LocalDateTime.now());
+        newTransaction.setTimestamp(requestDto.getTimestamp());
         newTransaction.setTransactionStatus(TransactionStatus.PENDING);
         return newTransaction;
 

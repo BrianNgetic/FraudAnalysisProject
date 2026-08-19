@@ -1,6 +1,8 @@
 package com.example.fraud_detection.Transaction_service.dtos;
 
 
+import java.time.LocalDateTime;
+
 import io.micrometer.common.lang.NonNull;
 import lombok.Builder;
 import lombok.Getter;
@@ -34,10 +36,12 @@ public class CreatedTransactionRequestDto{
 
     private String deviceId;
 
+    private LocalDateTime timestamp;
+
     public CreatedTransactionRequestDto(
         Long customerId, double transaction_amount, String currencyString, String merchant, 
         String merchantCategoryString, String country, Double longitude,
-        Double latitude, String deviceId
+        Double latitude, String deviceId, LocalDateTime timestamp
     ){
         this.customerId = customerId;
         this.transaction_amount = transaction_amount;
@@ -48,6 +52,7 @@ public class CreatedTransactionRequestDto{
         this.longitude = longitude;
         this.latitude = latitude;
         this.deviceId = deviceId;
+        this.timestamp = timestamp;
     }
 
 

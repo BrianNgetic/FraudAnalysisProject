@@ -4,14 +4,11 @@ package com.example.fraud_detection.fraud_detection_service.service;
 
 import com.example.fraud_detection.fraud_detection_service.kafka.KafkaFraudCreatedEvent;
 
-import java.lang.System.Logger.Level;
-import java.time.Duration;
-import java.time.Instant;
 import java.time.LocalDateTime;
-import java.time.ZoneId;
+
 import java.util.Optional;
 import java.util.ArrayList;
-import java.util.Comparator;
+
 import java.util.List;
 
 
@@ -23,9 +20,9 @@ import com.example.fraud_detection.fraud_detection_service.entity.FraudAnalysisR
 
 import com.example.fraud_detection.Transaction_service.repository.TransactionRepository;
 import com.example.fraud_detection.Transaction_service.entity.Transaction;
-import com.example.fraud_detection.fraud_detection_service.entity.CustomerCountryFrequency;
+
 import com.example.fraud_detection.fraud_detection_service.entity.CustomerProfile;
-import com.example.fraud_detection.fraud_detection_service.entity.TransactionHistory;
+
 import com.example.fraud_detection.fraud_detection_service.rules.*;
 
 import jakarta.persistence.EntityManager;
@@ -124,8 +121,7 @@ public class FraudDetectionAnalyzerService {
             else
             {
                 result.setHasHistory(true);
-            
-           
+ 
 
 
                 Long RiskScore = 0L;

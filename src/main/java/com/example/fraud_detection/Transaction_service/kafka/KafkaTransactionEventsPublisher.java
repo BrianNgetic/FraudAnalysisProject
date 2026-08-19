@@ -33,6 +33,7 @@ public class KafkaTransactionEventsPublisher {
       public void publishTransaction(Transaction savedTransaction) throws Exception{
         //create an TransactionEvent from the transaction, it includes the customers id
 
+        System.out.println("about to try to pass in timestamp :" + savedTransaction.getTimestamp());
           KafkaTransactionCreatedEvent transactionCreatedEvent = KafkaTransactionCreatedEvent.builder()
                             .transactionId(savedTransaction.getTransactionId())
                             .customerId(savedTransaction.getCustomer().getId())
@@ -44,7 +45,7 @@ public class KafkaTransactionEventsPublisher {
                             .merchant(savedTransaction.getMerchant())
                             .merchantCategory(savedTransaction.getMerchantCategory().toString())
                             .device(savedTransaction.getDeviceId())
-                            .timestamp(LocalDateTime.now())
+                            .timestamp(savedTransaction.getTimestamp())
                             .build();
 
         //publish and log it

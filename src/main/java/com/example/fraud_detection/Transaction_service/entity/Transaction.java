@@ -59,7 +59,7 @@ public class Transaction {
     private TransactionStatus transactionStatus;
 
     @Column
-    LocalDateTime timestamp = LocalDateTime.now();
+    LocalDateTime timestamp;
 
     
 

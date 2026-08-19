@@ -44,7 +44,9 @@ public class TransactionService {
         //the mapper here creates a validated transaction from the dto from the user
         for(CreatedTransactionRequestDto dto: createdTransactionRequestDtos){
              Transaction savedTransaction =  transactionRepository.saveAndFlush(transactionMapper.fromUserCreatedTransactionToTransaction(dto));
-            
+           
+            System.out.println("Successfully created transactio timestamp : " + dto.getTimestamp()) ;
+
              //publish the event
             try{kafkaTransactionEventsPublisher.publishTransaction(savedTransaction);
             //if successfull
