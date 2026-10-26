@@ -41,11 +41,12 @@ public class TransactionService {
     public void CreateTransaction(List<CreatedTransactionRequestDto> createdTransactionRequestDtos) throws Exception
     {
         //created and saved a transaction
-        //the mapper here creates a validated transaction from the dto from the user
+        //the mapper here first validates the values rom the dto given by the user and creates a transaction
         for(CreatedTransactionRequestDto dto: createdTransactionRequestDtos){
              Transaction savedTransaction =  transactionRepository.saveAndFlush(transactionMapper.fromUserCreatedTransactionToTransaction(dto));
            
-            System.out.println("Successfully created transactio timestamp : " + dto.getTimestamp()) ;
+            //testing purposes
+             System.out.println("Successfully created transactio timestamp : " + dto.getTimestamp()) ;
 
              //publish the event
             try{kafkaTransactionEventsPublisher.publishTransaction(savedTransaction);
@@ -60,7 +61,7 @@ public class TransactionService {
         
     }
 
-    public void publicTransaction(long Id) throws Exception{
+    public void publishTransaction(long Id) throws Exception{
          if(!transactionRepository.existsById(Id)){
             throw new TransactionNotFoundException();
         }

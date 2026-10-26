@@ -48,7 +48,7 @@ public class TransactionController {
     @PostMapping("/publish/{Id}")
     public ResponseEntity<?> publishTransaction(@PathVariable Long Id) throws Exception{
 
-        transactionService.publicTransaction(Id);
+        transactionService.publishTransaction(Id);
 
         return ResponseEntity.status(HttpStatus.CREATED).body(Id);
 

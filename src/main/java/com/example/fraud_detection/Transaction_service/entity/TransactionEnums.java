@@ -128,7 +128,8 @@ public enum TransactionStatus{
     DECLINED;
 
 
-     public static TransactionStatus fromString(String rawString){
+
+    public static TransactionStatus fromString(String rawString){
         if(rawString != null){
             String cleanRawString = rawString.trim().toUpperCase();
             for(TransactionStatus c: TransactionStatus.values()){
@@ -141,4 +142,5 @@ public enum TransactionStatus{
         return null;
     }
 }
+
 }

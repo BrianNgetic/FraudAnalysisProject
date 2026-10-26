@@ -15,18 +15,18 @@ import org.springframework.kafka.core.DefaultKafkaConsumerFactory;
 import org.springframework.kafka.support.serializer.JsonDeserializer;
 
 import com.example.fraud_detection.Transaction_service.kafka.KafkaTransactionCreatedEvent;
-import com.example.fraud_detection.fraud_detection_service.kafka.KafkaFraudCreatedEvent;
+import com.example.fraud_detection.fraud_detection_service.entity.FraudEvent;
 
 //not needed currently, doing auto configuration since this is basic  for now
 @Configuration
-public class KafkaConsumerConfig{
+public class KafkaConsumerConfig {
 
     @Value("${spring.kafka.bootstrap-servers}")
-    private String  bootStrapServers;
+    private String bootStrapServers;
 
-    //transactionEventConsumer
+    // transactionEventConsumer
     @Bean
-    public ConsumerFactory<String, KafkaTransactionCreatedEvent> TransactionEventConsumerFactory(){
+    public ConsumerFactory<String, KafkaTransactionCreatedEvent> TransactionEventConsumerFactory() {
         Map<String, Object> config = new HashMap<>();
 
         config.put(ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG, bootStrapServers);
@@ -37,31 +37,25 @@ public class KafkaConsumerConfig{
         config.put(ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG, JsonDeserializer.class);
 
         return new DefaultKafkaConsumerFactory<>(config,
-            new StringDeserializer(),
-            new JsonDeserializer<>(KafkaTransactionCreatedEvent.class)
-            );
+                new StringDeserializer(),
+                new JsonDeserializer<>(KafkaTransactionCreatedEvent.class));
     }
-    //FraudEventConsumer
-   
+    // FraudEventConsumer
 
     @Bean
-    public ConcurrentKafkaListenerContainerFactory<String, KafkaTransactionCreatedEvent>
-    kafkaTransactionListenerContainerFactory(){
+    public ConcurrentKafkaListenerContainerFactory<String, KafkaTransactionCreatedEvent> kafkaTransactionListenerContainerFactory() {
 
-        ConcurrentKafkaListenerContainerFactory<String, KafkaTransactionCreatedEvent> factory = 
-        new ConcurrentKafkaListenerContainerFactory<>();
+        ConcurrentKafkaListenerContainerFactory<String, KafkaTransactionCreatedEvent> factory = new ConcurrentKafkaListenerContainerFactory<>();
 
         factory.setConsumerFactory(TransactionEventConsumerFactory());
 
         return factory;
     }
 
-   
-
     @Bean
-    public ConsumerFactory<String, KafkaFraudCreatedEvent> FraudEventConsumerFactory(){
+    public ConsumerFactory<String, FraudEvent> FraudEventConsumerFactory() {
         Map<String, Object> config = new HashMap<>();
-        
+
         config.put(ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG, bootStrapServers);
         config.put(ConsumerConfig.GROUP_ID_CONFIG, "alert-service-group");
         config.put(ConsumerConfig.AUTO_OFFSET_RESET_CONFIG, "earliest");
@@ -70,19 +64,18 @@ public class KafkaConsumerConfig{
         config.put(ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG, JsonDeserializer.class);
 
         return new DefaultKafkaConsumerFactory<>(config,
-        new StringDeserializer(),
-        new JsonDeserializer<>(KafkaFraudCreatedEvent.class)
-        );
+                new StringDeserializer(),
+                new JsonDeserializer<>(FraudEvent.class));
 
     }
 
     @Bean
-     public ConcurrentKafkaListenerContainerFactory<String, KafkaFraudCreatedEvent> kafkaFraudListenerContainerFactory(){
-        ConcurrentKafkaListenerContainerFactory<String , KafkaFraudCreatedEvent> factory =  new ConcurrentKafkaListenerContainerFactory<>();
+    public ConcurrentKafkaListenerContainerFactory<String, FraudEvent> kafkaFraudListenerContainerFactory() {
+        ConcurrentKafkaListenerContainerFactory<String, FraudEvent> factory = new ConcurrentKafkaListenerContainerFactory<>();
 
         factory.setConsumerFactory(FraudEventConsumerFactory());
 
         return factory;
     }
-    
+
 }

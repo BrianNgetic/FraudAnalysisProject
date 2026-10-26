@@ -34,6 +34,7 @@ public class KafkaTransactionEventsPublisher {
         //create an TransactionEvent from the transaction, it includes the customers id
 
         System.out.println("about to try to pass in timestamp :" + savedTransaction.getTimestamp());
+        //create a valid kafka event from the transaction 
           KafkaTransactionCreatedEvent transactionCreatedEvent = KafkaTransactionCreatedEvent.builder()
                             .transactionId(savedTransaction.getTransactionId())
                             .customerId(savedTransaction.getCustomer().getId())

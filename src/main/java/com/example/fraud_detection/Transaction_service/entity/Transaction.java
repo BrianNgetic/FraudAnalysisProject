@@ -61,10 +61,6 @@ public class Transaction {
     @Column
     LocalDateTime timestamp;
 
-    
-
-
-
 
 
 

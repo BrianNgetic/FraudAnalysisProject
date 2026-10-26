@@ -16,6 +16,7 @@ import jakarta.persistence.JoinColumn;
 import jakarta.persistence.OneToOne;
 import jakarta.persistence.SqlResultSetMapping;
 import jakarta.persistence.Table;
+import jakarta.annotation.Nonnull;
 import jakarta.persistence.ColumnResult;
 import lombok.Getter;
 import lombok.Setter;
@@ -49,8 +50,10 @@ public class TransactionEmbedding {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @OneToOne(fetch = FetchType.EAGER)
-    @JoinColumn(name = "Result_Id")
+    //because OneToOne is optional by default, i have to explicitly 
+    //change that
+    @OneToOne(fetch = FetchType.EAGER,optional =  false)
+    @JoinColumn(name = "Result_Id" ,nullable = false)
     private  FraudAnalysisResult analysisResult;
 
     private long customerId;
@@ -67,7 +70,7 @@ public class TransactionEmbedding {
     }
    
     public Long tempClass(){
-        return this.analysisResult.getId();
+         return this.analysisResult.getId();
     }
     
 }

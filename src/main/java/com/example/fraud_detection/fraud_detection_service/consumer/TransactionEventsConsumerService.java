@@ -20,7 +20,7 @@ import com.example.fraud_detection.fraud_detection_service.entity.FraudAnalysisR
 import com.example.fraud_detection.fraud_detection_service.entity.SimilarTransactionDTO;
 import com.example.fraud_detection.fraud_detection_service.entity.FraudAnalysisResult.LEVEL;
 import com.example.fraud_detection.fraud_detection_service.entity.FraudAnalysisResult.STATUS;
-import com.example.fraud_detection.fraud_detection_service.kafka.KafkaFraudEventsPublisher;
+import com.example.fraud_detection.fraud_detection_service.publisher.FraudEventPublisher;
 import com.example.fraud_detection.fraud_detection_service.entity.TransactionEmbedding;
 import com.example.fraud_detection.fraud_detection_service.repository.EmbeddingRepository;
 
@@ -29,102 +29,110 @@ import com.example.fraud_detection.fraud_detection_service.repository.EmbeddingR
 @Service
 public class TransactionEventsConsumerService {
 
-     private final TravelAnalyzer travelAnalyzer;
+        private final TravelAnalyzer travelAnalyzer;
 
-     private final FraudDetectionApplication fraudDetectionApplication;
+        private final FraudDetectionApplication fraudDetectionApplication;
 
-     private final KafkaFraudEventsPublisher kafkaFraudEventsPublisher;
+        private final FraudEventPublisher FraudEventPublisher;
 
-     private static final String TOPIC = "transactionEvent-topic";
+        private static final String TOPIC = "transactionEvent-topic";
 
-     private FraudDetectionAnalyzerService fraudDetectionAnalyzerService;
-     private EmbeddingService embeddingService;
-     private FraudAnalysisResultRepository fraudAnalysisResultRepository;
-     private EmbeddingRepositoryCustomImpl customEmbeddingRepository;
-     private EmbeddingRepository embeddingRepository;
-     
+        private FraudDetectionAnalyzerService fraudDetectionAnalyzerService;
+        private EmbeddingService embeddingService;
+        private FraudAnalysisResultRepository fraudAnalysisResultRepository;
+        private EmbeddingRepositoryCustomImpl customEmbeddingRepository;
+        private EmbeddingRepository embeddingRepository;
 
-
-     public TransactionEventsConsumerService(FraudDetectionAnalyzerService fraudDetectionAnalyzerService,
-                                          FraudAnalysisResultRepository fraudAnalysisResultRepository,
-                                          KafkaFraudEventsPublisher kafkaFraudEventsPublisher, 
-                                          FraudDetectionApplication fraudDetectionApplication,
-                                          EmbeddingRepositoryCustomImpl customEmbeddingRepository,
-                                          EmbeddingService embeddingService,
-                                          EmbeddingRepository embeddingRepository, TravelAnalyzer travelAnalyzer){
-        this.fraudDetectionAnalyzerService = fraudDetectionAnalyzerService;
-        this.fraudAnalysisResultRepository = fraudAnalysisResultRepository;
-        this.kafkaFraudEventsPublisher = kafkaFraudEventsPublisher;
-        this.fraudDetectionApplication = fraudDetectionApplication;
-        this.customEmbeddingRepository = customEmbeddingRepository;
-        this.embeddingService = embeddingService;
-        this.embeddingRepository = embeddingRepository;
-        this.travelAnalyzer = travelAnalyzer;
-     }
-   
-    @KafkaListener(topics = TOPIC , groupId = "fraud-detection-group", containerFactory = "kafkaTransactionListenerContainerFactory") 
-    public void  listenToTopic(KafkaTransactionCreatedEvent createdEvent) throws Exception{ 
-            System.out.print("Recieved event from transaction ID: " + createdEvent.getTransactionId() + " Customer : "+  createdEvent.getCustomerId());
-
-        FraudAnalysisResult analysis_result = fraudDetectionAnalyzerService.isFraud(createdEvent);
-
-        fraudAnalysisResultRepository.save(analysis_result);
-       
-       System.out.println("The current Fraud Result being anayzed rn is of Id: " + analysis_result.getId());
-        //embedds and saves 
-       TransactionEmbedding embedding_result =  embeddingService.embedTransaction(createdEvent, analysis_result);
-
-        List<SimilarTransactionDTO> similarTransactions = customEmbeddingRepository.findSimilar(embedding_result.getEmbedding(), 5);
-
-        embeddingRepository.save(embedding_result);
-
-       if(analysis_result.getRiskLevel() == LEVEL.CRITICAL || analysis_result.getRiskLevel() == LEVEL.HIGH){
-                analysis_result.setStatus(STATUS.FRAUD);
-                
-       }
-       
-       
-       long highRiskCount = similarTransactions.stream().filter(t -> t.transactionEmbedding().getAnalysisResult().getRiskLevel() == LEVEL.HIGH ||
-                                                                   t.transactionEmbedding().getAnalysisResult().getRiskLevel() == LEVEL.CRITICAL)
-                                                                .count();
-        if(highRiskCount >= 2){
-                if(analysis_result.getRiskLevel()  == LEVEL.LOW){analysis_result.setRiskLevel(LEVEL.MEDIUM);}
-                if(analysis_result.getRiskLevel() == LEVEL.MEDIUM){analysis_result.setRiskLevel(LEVEL.HIGH);}
+        public TransactionEventsConsumerService(FraudDetectionAnalyzerService fraudDetectionAnalyzerService,
+                        FraudAnalysisResultRepository fraudAnalysisResultRepository,
+                        FraudEventPublisher FraudEventPublisher,
+                        FraudDetectionApplication fraudDetectionApplication,
+                        EmbeddingRepositoryCustomImpl customEmbeddingRepository,
+                        EmbeddingService embeddingService,
+                        EmbeddingRepository embeddingRepository, TravelAnalyzer travelAnalyzer) {
+                this.fraudDetectionAnalyzerService = fraudDetectionAnalyzerService;
+                this.fraudAnalysisResultRepository = fraudAnalysisResultRepository;
+                this.FraudEventPublisher = FraudEventPublisher;
+                this.fraudDetectionApplication = fraudDetectionApplication;
+                this.customEmbeddingRepository = customEmbeddingRepository;
+                this.embeddingService = embeddingService;
+                this.embeddingRepository = embeddingRepository;
+                this.travelAnalyzer = travelAnalyzer;
         }
 
+        @KafkaListener(topics = TOPIC, groupId = "fraud-detection-group", containerFactory = "kafkaTransactionListenerContainerFactory")
+        public void listenToTopic(KafkaTransactionCreatedEvent createdEvent) throws Exception {
+                System.out.print("Recieved event from transaction ID: " + createdEvent.getTransactionId()
+                                + " Customer : " + createdEvent.getCustomerId());
 
-       printSimilarTransactions(similarTransactions);
+                // sends it to be analyzed iwth our own logic
+                FraudAnalysisResult analysis_result = fraudDetectionAnalyzerService.isFraud(createdEvent);
 
+                fraudAnalysisResultRepository.save(analysis_result);
 
-        //if it isnt fraud then lets just save the event
-      
-        if(analysis_result.getStatus() == STATUS.FRAUD){
-                kafkaFraudEventsPublisher.PublishEvent(analysis_result);
+                System.out.println("The current Fraud Result being anayzed rn is of Id: " + analysis_result.getId());
+                // embedds and saves
+                TransactionEmbedding embedding_result = embeddingService.embedTransaction(createdEvent,
+                                analysis_result);
+
+                List<SimilarTransactionDTO> similarTransactions = customEmbeddingRepository
+                                .findSimilar(embedding_result.getEmbedding(), 5);
+
+                embeddingRepository.save(embedding_result);
+
+                if (analysis_result.getRiskLevel() == LEVEL.CRITICAL || analysis_result.getRiskLevel() == LEVEL.HIGH) {
+                        analysis_result.setStatus(STATUS.FRAUD);
+
+                }
+
+                long highRiskCount = similarTransactions.stream()
+                                .filter(t -> t.transactionEmbedding().getAnalysisResult().getRiskLevel() == LEVEL.HIGH
+                                                ||
+                                                t.transactionEmbedding().getAnalysisResult()
+                                                                .getRiskLevel() == LEVEL.CRITICAL)
+                                .count();
+                if (highRiskCount >= 2) {
+                        if (analysis_result.getRiskLevel() == LEVEL.LOW) {
+                                analysis_result.setRiskLevel(LEVEL.MEDIUM);
+                        }
+                        if (analysis_result.getRiskLevel() == LEVEL.MEDIUM) {
+                                analysis_result.setRiskLevel(LEVEL.HIGH);
+                        }
+                }
+
+                // printSimilarTransactions(similarTransactions); //testing purposes
+
+                if (analysis_result.getRiskLevel() == LEVEL.HIGH || analysis_result.getRiskLevel() == LEVEL.CRITICAL) {
+                        System.out.println("check");
+                        analysis_result.setStatus(STATUS.FRAUD);
+                } else {
+                        analysis_result.setStatus(STATUS.NOT_FRAUD);
+                }
+
+                if (analysis_result.getStatus() == STATUS.FRAUD) {
+                        System.out.println("and check");
+                        FraudEventPublisher.PublishEvent(analysis_result);
+                        System.out.println("last check");
+                }
+
         }
 
+        @Transactional
+        public void printSimilarTransactions(List<SimilarTransactionDTO> similarTransactions) {
 
+                System.out.println("The 5 closest Transactions to this ones are ... ");
+                for (int i = 0; i < similarTransactions.size(); i++) {
 
-        //if it is we publish it to the fraud_events service
+                        FraudAnalysisResult thisResult = similarTransactions.get(i).transactionEmbedding()
+                                        .getAnalysisResult();
+
+                        System.out.println("Transaction Id: " + thisResult.getTransaction_id()
+                                        + " Distance: " + similarTransactions.get(i).distance() +
+                                        " Similarity " + similarTransactions.get(i).similarity() +
+                                        "Fraud level : " + similarTransactions.get(i).transactionEmbedding()
+                                                        .getAnalysisResult().getRiskLevel().toString());
+
+                }
         }
 
-     @Transactional
-     public void printSimilarTransactions(List<SimilarTransactionDTO> similarTransactions){
-        
-        System.out.println("The 5 closest Transactions to this ones are ... " );
-                for(int i = 0; i < similarTransactions.size(); i++){
-                
-
-                FraudAnalysisResult thisResult = similarTransactions.get(i).transactionEmbedding().getAnalysisResult();
-
-                System.out.println("Transaction Id: " + thisResult.getTransaction_id() 
-                                + " Distance: " + similarTransactions.get(i).distance()  + 
-                                " Similarity " + similarTransactions.get(i).similarity() + 
-                                "Fraud level : " + similarTransactions.get(i).transactionEmbedding().getAnalysisResult().getRiskLevel().toString());
-
-
-       }
 }
- 
-
-}
-
