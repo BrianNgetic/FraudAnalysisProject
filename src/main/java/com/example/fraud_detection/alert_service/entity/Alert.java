@@ -10,9 +10,9 @@ import lombok.Getter;
 import lombok.Setter;
 
 import java.time.Instant;
+import java.util.UUID;
 
-
-import groovy.transform.builder.Builder;
+import lombok.Builder;
 
 @Entity 
 @Getter 
@@ -46,7 +46,7 @@ public class Alert {
     private Long fraudAnalysisResultId;
 
     @Column 
-    private Long fraudEventId;
+    private UUID fraudEventId;
 
     @Column 
     private AlertStatus status;

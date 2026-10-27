@@ -8,8 +8,10 @@ import org.springframework.stereotype.Service;
 import com.example.fraud_detection.fraud_detection_service.repository.FraudAnalysisResultRepository;
 import com.example.fraud_detection.fraud_detection_service.exception.FraudAnalysisResultNotFoundException;
 import com.example.fraud_detection.fraud_detection_service.entity.FraudAnalysisResult;
+import com.example.fraud_detection.fraud_detection_service.entity.FraudAnalysisResult.LEVEL;
 import com.example.fraud_detection.fraud_detection_service.entity.FraudEvent;
 import com.example.fraud_detection.alert_service.entity.Alert;
+import com.example.fraud_detection.alert_service.entity.Alert.AlertSeverity;
 import com.example.fraud_detection.alert_service.entity.Alert.AlertStatus;
 
 
@@ -34,17 +36,30 @@ public class AlertService {
         
             FraudAnalysisResult analysisResult = fraudAnalysisResultRepository.getReferenceById(analysisResultId);
 
-            Alert newAlert = new Alert.builder()
+            Alert newAlert = Alert.builder()
                                 .transactionId(fraudEvent.transactionId())
                                 .fraudAnalysisResultId(analysisResultId)
                                 .fraudEventId(fraudEvent.eventId())
                                 .status(AlertStatus.NEW)
-                                .severity(analysisResult.getRiskLevel())
+                                .severity(mapToSeverity(analysisResult.getRiskLevel()))
                                 .title((analysisResult.getRiskLevel().toString() + "-risk detected"))
-                                .creaatedAt(Instant.now())
+                                .createdAt(Instant.now())
                                 .updatedAt(Instant.now())
                                 .resolvedAt(null)
                                 .build();
+
+            return newAlert;
            
+        }
+
+
+        public static AlertSeverity mapToSeverity(LEVEL level) {
+                if (level == null) return null;
+                return switch (level) {
+                    case LOW -> AlertSeverity.LOW;
+                    case MEDIUM -> AlertSeverity.MEDIUM;
+                    case HIGH -> AlertSeverity.HIGH;
+                    case CRITICAL -> AlertSeverity.CRITICAL;
+                };
         }
 }
