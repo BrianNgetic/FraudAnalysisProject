@@ -4,8 +4,6 @@ import com.example.fraud_detection.alert_service.entity.Alert;
 import com.example.fraud_detection.alert_service.entity.Alert.AlertSeverity;
 import com.example.fraud_detection.alert_service.entity.Alert.AlertStatus;
 
-import javax.print.attribute.standard.Severity;
-
 import com.example.fraud_detection.alert_service.dto.AlertRequestDto;
 
 public class AlertMapper {
@@ -27,6 +25,10 @@ public class AlertMapper {
 
     }
 
+   
+
+
+
     public static String mapToSeverity(AlertSeverity severity){
         if(severity == null) return null;
         return switch(severity){
@@ -45,7 +47,22 @@ public class AlertMapper {
           case   ACKNOWLEDGED -> "ACKNOWLEDGED";
           case  RESOLVED -> "RESOLVED";
         };
-     }
+    }
+
+    public  AlertStatus mapStringToStatus(String newStatus){
+        if(newStatus == null || newStatus.isEmpty()){
+            return null;
+        }
+
+        return switch(newStatus){
+            case "NEW" -> AlertStatus.NEW;
+            case "ACKNOWLEDGED" -> AlertStatus.ACKNOWLEDGED;
+            case  "RESOLVED" -> AlertStatus.RESOLVED;
+            default -> throw new IllegalArgumentException("Unknown alert status: " + newStatus);
+        };
+
+    }
+     
 
 
 

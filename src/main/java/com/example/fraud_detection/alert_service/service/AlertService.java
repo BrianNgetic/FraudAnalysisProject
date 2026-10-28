@@ -8,7 +8,11 @@ import org.springframework.stereotype.Service;
 
 import com.example.fraud_detection.fraud_detection_service.repository.FraudAnalysisResultRepository;
 
-import groovyjarjarantlr4.v4.codegen.SourceGenTriggers.alternative_return;
+
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 
 import com.example.fraud_detection.alert_service.repository.AlertRepository;
 import com.example.fraud_detection.fraud_detection_service.exception.FraudAnalysisResultNotFoundException;
@@ -21,6 +25,8 @@ import com.example.fraud_detection.alert_service.entity.Alert.AlertSeverity;
 import com.example.fraud_detection.alert_service.entity.Alert.AlertStatus;
 import com.example.fraud_detection.alert_service.dto.AlertRequestDto;
 import com.example.fraud_detection.alert_service.mapper.AlertMapper;
+import com.example.fraud_detection.alert_service.dto.UpdateAlertStatusRequest;
+
 
 
 
@@ -68,7 +74,7 @@ public class AlertService {
            
         }
 
-        public  AlertRequestDto getAlert(Long Id) throws Exception{
+        public  AlertRequestDto getSingleAlert(Long Id) throws Exception{
             
             if(Id == null){
                 throw new IllegalArgumentException("Alert ID must not be null");
@@ -85,8 +91,44 @@ public class AlertService {
                 
            
         }
+
+        public  Page<AlertRequestDto> getLatestAlerts(){
+
+            Pageable latestFirst = PageRequest.of(0, 10, Sort.by("createdAt").descending());
+            Page<Alert> dashBoardAlertPage = alertRepository.findLatestAlerts(latestFirst);
+
+
+            Page<AlertRequestDto> dtoPage = dashBoardAlertPage.map(alert ->  alertMapper.AlertToAlertRequestMapper(alert));            
+
+
+            
+            return dtoPage;
+        }
         
+
+        public Page<AlertRequestDto> getAlertsInPages(int page){
+            Pageable currentPage = PageRequest.of(page - 1, 10);
+
+             return alertRepository.findAll(currentPage).map(alert ->alertMapper.AlertToAlertRequestMapper(alert));
+        }
         
+
+         public void patchAlertRequest(UpdateAlertStatusRequest updatedAlertStatus, Long Id) throws Exception{
+            if(Id == null){
+                throw new IllegalArgumentException("Alert ID must not be null");
+            }
+          
+            Optional<Alert> alertOpt = alertRepository.findById(Id);
+            if(alertOpt.isEmpty()){
+                throw new AlertNotFoundException();
+            }
+            else{
+                Alert thisAlert = alertOpt.get();
+                thisAlert.setStatus(alertMapper.mapStringToStatus(updatedAlertStatus.getUpdatedStatus()));
+        
+            }
+
+    }
 
 
         public static AlertSeverity mapToSeverity(LEVEL level) {
