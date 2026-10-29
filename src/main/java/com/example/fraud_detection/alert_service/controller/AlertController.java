@@ -43,6 +43,7 @@ public class AlertController {
         return ResponseEntity.ok(alertService.getLatestAlerts());
     }
 
+    
     @GetMapping ("/Id")
     public ResponseEntity<AlertRequestDto> getAlert(@PathVariable  Long Id) throws Exception{ 
             return ResponseEntity.ok(alertService.getSingleAlert(Id));

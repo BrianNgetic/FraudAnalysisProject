@@ -4,8 +4,11 @@ import com.example.fraud_detection.alert_service.entity.Alert;
 import com.example.fraud_detection.alert_service.entity.Alert.AlertSeverity;
 import com.example.fraud_detection.alert_service.entity.Alert.AlertStatus;
 
+import org.springframework.stereotype.Component;
+
 import com.example.fraud_detection.alert_service.dto.AlertRequestDto;
 
+@Component 
 public class AlertMapper {
     
 

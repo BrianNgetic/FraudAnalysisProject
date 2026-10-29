@@ -8,6 +8,7 @@ import org.springframework.stereotype.Service;
 
 import com.example.fraud_detection.fraud_detection_service.repository.FraudAnalysisResultRepository;
 
+import jakarta.transaction.Transactional;
 
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -48,6 +49,7 @@ public class AlertService {
         }
 
 
+        @Transactional
         public Alert createAlert(FraudEvent fraudEvent) throws Exception{
 
             Long analysisResultId = fraudEvent.fraudAnalysisResultId();
@@ -56,6 +58,8 @@ public class AlertService {
                 throw new  FraudAnalysisResultNotFoundException();
             }
         
+            //since i plan on accessing the proxy, i need a transactional on this
+            // method
             FraudAnalysisResult analysisResult = fraudAnalysisResultRepository.getReferenceById(analysisResultId);
 
             Alert newAlert = Alert.builder()
@@ -70,6 +74,7 @@ public class AlertService {
                                 .resolvedAt(null)
                                 .build();
 
+            System.out.println("created new alert");
             return newAlert;
            
         }
@@ -95,7 +100,7 @@ public class AlertService {
         public  Page<AlertRequestDto> getLatestAlerts(){
 
             Pageable latestFirst = PageRequest.of(0, 10, Sort.by("createdAt").descending());
-            Page<Alert> dashBoardAlertPage = alertRepository.findLatestAlerts(latestFirst);
+            Page<Alert> dashBoardAlertPage = alertRepository.findAll(latestFirst);
 
 
             Page<AlertRequestDto> dtoPage = dashBoardAlertPage.map(alert ->  alertMapper.AlertToAlertRequestMapper(alert));            
