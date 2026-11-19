@@ -24,7 +24,7 @@ public class CreatedTransactionRequestDto{
 
     private String merchant;
 
-    private String merchantCategoryString;
+    private String merchantCategory;
 
     private String country;
 
@@ -40,14 +40,14 @@ public class CreatedTransactionRequestDto{
 
     public CreatedTransactionRequestDto(
         Long customerId, double transaction_amount, String currencyString, String merchant, 
-        String merchantCategoryString, String country, Double longitude,
+        String merchantCategory, String country, Double longitude,
         Double latitude, String deviceId, LocalDateTime timestamp
     ){
         this.customerId = customerId;
         this.transaction_amount = transaction_amount;
         this.currencyString  = currencyString;
         this.merchant = merchant;
-        this.merchantCategoryString = merchantCategoryString;
+        this.merchantCategory = merchantCategory;
         this.country = country;
         this.longitude = longitude;
         this.latitude = latitude;

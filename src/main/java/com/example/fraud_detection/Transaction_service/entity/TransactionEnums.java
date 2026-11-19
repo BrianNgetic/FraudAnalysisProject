@@ -66,6 +66,7 @@ public class TransactionEnums {
 
 public enum Country {
     USA,
+    ENG,
     CAN,
     GBR,
     AUS,
@@ -75,6 +76,7 @@ public enum Country {
     IND,
     BRA,
     MEX;
+
 
     public static Country fromString(String rawString){
         if(rawString != null){

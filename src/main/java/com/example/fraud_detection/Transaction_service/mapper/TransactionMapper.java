@@ -6,7 +6,7 @@ package com.example.fraud_detection.Transaction_service.mapper;
 import java.time.LocalDateTime;
 import java.util.Optional;
 
-import org.springframework.cglib.core.Local;
+
 import org.springframework.stereotype.Component;
 
 import com.example.fraud_detection.Transaction_service.entity.*;
@@ -17,6 +17,8 @@ import com.example.fraud_detection.Transaction_service.entity.TransactionEnums.M
 import com.example.fraud_detection.Transaction_service.entity.TransactionEnums.TransactionStatus;
 import com.example.fraud_detection.Transaction_service.dtos.*;
 import com.example.fraud_detection.Transaction_service.repository.CustomerRepository;
+
+import jakarta.transaction.Transactional;
 
 import com.example.fraud_detection.Transaction_service.exception.*;
 
@@ -31,15 +33,21 @@ public class TransactionMapper {
     }
 
     //validates the transactiondto from the user and returns an actual transaction
+    @Transactional
     public Transaction fromUserCreatedTransactionToTransaction(CreatedTransactionRequestDto requestDto) throws Exception
     {
     
         //first validate if the customer exists
-        if(!customerRepository.existsById(requestDto.getCustomerId())){
-                throw new CustomerNotFoundException();
-        }
-        Customer customer = customerRepository.getReferenceById(requestDto.getCustomerId());
+        Customer customer;
+      
+        Optional<Customer> Optcustomer = customerRepository.findById(requestDto.getCustomerId());
 
+        if(!Optcustomer.isPresent()){
+            throw new CustomerNotFoundException();
+        }
+        else{
+            customer = Optcustomer.get();
+        }
         //validate the currency
         Optional<Currency> verifiedCurrency = Currency.fromString(requestDto.getCurrencyString());
         if(verifiedCurrency.isEmpty()){
@@ -54,25 +62,27 @@ public class TransactionMapper {
 
         //validate the category
 
-        MerchantCategory verifiedMerchantCategory  = MerchantCategory.fromString(requestDto.getMerchantCategoryString());
+        MerchantCategory verifiedMerchantCategory  = MerchantCategory.fromString(requestDto.getMerchantCategory());
+        System.out.println("The current category is " + requestDto.getMerchantCategory());
         if(verifiedMerchantCategory  == null){
+  
             throw new InvalidMerchantCategoryException();
         }
 
 
         Transaction newTransaction = new Transaction();
-        newTransaction.setCustomer(customer);
-        newTransaction.setAmount(requestDto.getTransaction_amount());
-        newTransaction.setCurrency(verifiedCurrency.get());
-        newTransaction.setCountry(verifiedCountry);
-        newTransaction.setMerchant(requestDto.getMerchant());
-        newTransaction.setMerchantCategory(verifiedMerchantCategory);
-        newTransaction.setLatitude(requestDto.getLatitude());
-        newTransaction.setLongitude(requestDto.getLongitude());
-        newTransaction.setDeviceId(requestDto.getDeviceId());
-        newTransaction.setTransactionStatus(TransactionStatus.APPROVED);
-        newTransaction.setTimestamp(requestDto.getTimestamp());
-        newTransaction.setTransactionStatus(TransactionStatus.PENDING);
+            newTransaction.setCustomer(customer);
+            newTransaction.setAmount(requestDto.getTransaction_amount());
+            newTransaction.setCurrency(verifiedCurrency.get());
+            newTransaction.setCountry(verifiedCountry);
+            newTransaction.setMerchant(requestDto.getMerchant());
+            newTransaction.setMerchantCategory(verifiedMerchantCategory);
+            newTransaction.setLatitude(requestDto.getLatitude());
+            newTransaction.setLongitude(requestDto.getLongitude());
+            newTransaction.setDeviceId(requestDto.getDeviceId());
+            newTransaction.setTransactionStatus(TransactionStatus.APPROVED);
+            newTransaction.setTimestamp(requestDto.getTimestamp());
+            newTransaction.setTransactionStatus(TransactionStatus.PENDING);
         return newTransaction;
 
         
@@ -85,11 +95,11 @@ public class TransactionMapper {
     public Customer fromUserCreatedCustomerToCustomer(CreatedCustomerRequestDto customerDto){
         
 
-        Customer newCustomer = new Customer();
-        newCustomer.setName(customerDto.getName());
-        newCustomer.setEmail(customerDto.getEmail());
-        newCustomer.setCreatedAt(LocalDateTime.now());
-
+      Customer newCustomer  = Customer.builder()
+                                                .name(customerDto.getName())
+                                                .email(customerDto.getEmail())
+                                                .createdAt(LocalDateTime.now())
+                                                .build();                    
         return newCustomer;
     }
 

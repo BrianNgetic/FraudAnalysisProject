@@ -5,7 +5,7 @@ import com.example.fraud_detection.FraudDetectionApplication;
 import com.example.fraud_detection.fraud_detection_service.rules.TravelAnalyzer;
 import java.util.List;
 
-import org.springframework.ai.embedding.Embedding;
+
 import org.springframework.kafka.annotation.KafkaListener;
 import org.springframework.stereotype.Service;
 

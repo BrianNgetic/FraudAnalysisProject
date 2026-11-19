@@ -4,7 +4,7 @@ import java.time.LocalDateTime;
 import java.util.List;
 
 
-import com.example.fraud_detection.Transaction_service.repository.CustomerRepository;
+
 import com.example.fraud_detection.Transaction_service.entity.Customer;
 
 import jakarta.persistence.Entity;

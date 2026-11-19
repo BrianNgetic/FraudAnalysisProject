@@ -36,8 +36,8 @@ public class CustomerController {
         
     }
 
-       @PostMapping("/bulk")
-    public ResponseEntity<?> CreateCustomer(@RequestBody List<Customer> customers) throws Exception
+     @PostMapping("/create/bulk")
+    public ResponseEntity<?> CreateCustomer(@RequestBody List<CreatedCustomerRequestDto> customers) throws Exception
     { 
 
         customerService.CreateCustomerBulk(customers);

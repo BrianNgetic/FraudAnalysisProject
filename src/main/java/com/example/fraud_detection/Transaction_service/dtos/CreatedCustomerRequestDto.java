@@ -1,7 +1,8 @@
 package com.example.fraud_detection.Transaction_service.dtos;
 
+import lombok.Getter;
 
-
+@Getter
 public class CreatedCustomerRequestDto {
     
     private String name;

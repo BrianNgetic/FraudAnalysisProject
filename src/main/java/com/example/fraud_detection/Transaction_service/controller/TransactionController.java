@@ -24,7 +24,7 @@ import java.util.List;
 @RequestMapping("/transactions")
 public class TransactionController {
 
-    public TransactionService transactionService;
+    private final  TransactionService transactionService;
 
     public TransactionController(TransactionService transactionService)
    {
@@ -33,12 +33,12 @@ public class TransactionController {
     
     
     @PostMapping("/create")
-    public ResponseEntity<?> populateTransactions(@RequestBody List<CreatedTransactionRequestDto> transactionDtos) throws Exception {
+    public ResponseEntity<?> populateTransactions(@RequestBody CreatedTransactionRequestDto transactionDto) throws Exception {
 
       
-        transactionService.CreateTransaction(transactionDtos);
+        transactionService.CreateTransaction(transactionDto);
       
-        return ResponseEntity.status(HttpStatus.CREATED).body(transactionDtos);
+        return ResponseEntity.status(HttpStatus.CREATED).body(transactionDto);
 
 
         

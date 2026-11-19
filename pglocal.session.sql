@@ -1,11 +1,14 @@
 -- select * from customer;
 -- delete  from transaction;
-select * from fraud_analysis_result;
--- delete   from transaction_embeddings
+-- -- select * from fraud_analysis_result;
+-- -- delete   from transaction_embeddings
 -- select * from customer;
 -- select * from transaction;
 -- SELECT *  from fraud_analysis_result;
 -- SELECT * from transaction_embeddings;
 -- select * from FraudEvent;;
+-- -- delete from transaction;
 -- delete from transaction;
--- delete from transaction;
+-- delete from fraud_analysis_resulta;
+
+select * from alert;

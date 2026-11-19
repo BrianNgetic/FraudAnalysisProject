@@ -12,7 +12,7 @@ import com.example.fraud_detection.Transaction_service.mapper.*;
 import com.example.fraud_detection.Transaction_service.exception.CustomerAlreadyExistsException;
 import com.example.fraud_detection.Transaction_service.exception.CustomerNotFoundException;
 
-
+import java.time.LocalDateTime;
 import java.util.List;
 
 @Service
@@ -40,18 +40,19 @@ public class CustomerService {
     
 
     //not used for now
-    public void CreateCustomerBulk(List<Customer> customers) throws Exception{
+    public void CreateCustomerBulk(List<CreatedCustomerRequestDto> customers) throws Exception{
         
     
-        for(Customer custo: customers){
-        if(customerRepository.existsById(custo.getId())){
-            throw new CustomerAlreadyExistsException("Could not save customer " + custo.getName() + "already exists");
+        for(CreatedCustomerRequestDto custo: customers){
+             if(customerRepository.existsByemail(custo.getEmail())){
+                     throw new CustomerAlreadyExistsException();
+                }
+            customerRepository.save(transactionMapper.fromUserCreatedCustomerToCustomer(custo));
+    
         }
-        customerRepository.save(custo);
-    }
     }
 
-
+    @Transactional
     public Customer getCustomerById(Long id) throws Exception{
         if(!customerRepository.existsById(id)){
             throw new CustomerNotFoundException();

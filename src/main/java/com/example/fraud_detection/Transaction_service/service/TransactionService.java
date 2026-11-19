@@ -6,6 +6,9 @@ import org.springframework.stereotype.Service;
 import java.util.List;
 
 import com.example.fraud_detection.Transaction_service.repository.*;
+
+import jakarta.transaction.Transactional;
+
 import com.example.fraud_detection.Transaction_service.entity.Transaction;
 import com.example.fraud_detection.Transaction_service.entity.TransactionEnums.TransactionStatus;
 import com.example.fraud_detection.Transaction_service.exception.CustomerNotFoundException;
@@ -38,15 +41,29 @@ public class TransactionService {
 
 
     
-    public void CreateTransaction(List<CreatedTransactionRequestDto> createdTransactionRequestDtos) throws Exception
+    public void CreateTransaction(CreatedTransactionRequestDto createdTransactionRequestDto) throws Exception
     {
         //created and saved a transaction
         //the mapper here first validates the values rom the dto given by the user and creates a transaction
-        for(CreatedTransactionRequestDto dto: createdTransactionRequestDtos){
-             Transaction savedTransaction =  transactionRepository.saveAndFlush(transactionMapper.fromUserCreatedTransactionToTransaction(dto));
-           
+        // for(CreatedTransactionRequestDto dto: createdTransactionRequestDtos){
+
+        System.out.println("Customer ID: " + createdTransactionRequestDto.getCustomerId());
+System.out.println("Transaction Amount: " + createdTransactionRequestDto.getTransaction_amount());
+System.out.println("Currency: " + createdTransactionRequestDto.getCurrencyString());
+System.out.println("Merchant: " + createdTransactionRequestDto.getMerchant());
+System.out.println("Merchant Category: " + createdTransactionRequestDto.getMerchantCategory());
+System.out.println("Country: " + createdTransactionRequestDto.getCountry());
+System.out.println("Longitude: " + createdTransactionRequestDto.getLongitude());
+System.out.println("Latitude: " + createdTransactionRequestDto.getLatitude());
+System.out.println("Device ID: " + createdTransactionRequestDto.getDeviceId());
+System.out.println("Timestamp: " + createdTransactionRequestDto.getTimestamp());
+
+        if(createdTransactionRequestDto != null){
+                  Transaction savedTransaction =  transactionRepository.saveAndFlush(transactionMapper.fromUserCreatedTransactionToTransaction(createdTransactionRequestDto));
+
+            
             //testing purposes
-             System.out.println("Successfully created transactio timestamp : " + dto.getTimestamp()) ;
+            //  System.out.println("Successfully created transactio timestamp : " + dto.getTimestamp()) ;
 
              //publish the event
             try{kafkaTransactionEventsPublisher.publishTransaction(savedTransaction);
@@ -60,7 +77,7 @@ public class TransactionService {
         //return some typa responce from this
         
     }
-
+    @Transactional
     public void publishTransaction(long Id) throws Exception{
          if(!transactionRepository.existsById(Id)){
             throw new TransactionNotFoundException();
